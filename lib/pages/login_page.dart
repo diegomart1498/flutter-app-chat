@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
+import 'package:chat_app/helpers/mostrar_alerta.dart';
+import 'package:chat_app/services/auth_service.dart';
 import 'package:chat_app/widgets/widgets.dart';
 
 class LoginPage extends StatelessWidget {
@@ -45,6 +50,8 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 50),
       child: Column(
@@ -63,18 +70,39 @@ class __FormState extends State<_Form> {
             isPassword: true,
           ),
           BotonAzul(
-            text: 'Ingresar',
-            onPress: () => onPress,
+            text: (!authService.autenticando) ? 'Ingresar' : '',
+            onPress: (!authService.autenticando) ? () => onPress : () => null,
           ),
         ],
       ),
     );
   }
 
-  void onPress() {
-    print('email: ${emailController.text}');
-    print('contra: ${passwordController.text}');
-    FocusScope.of(context).unfocus();
-    //TODO: Realizar acciones del botón ingresar
+  void onPress() async {
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+    if (email.isEmpty || password.isEmpty) {
+      Fluttertoast.showToast(
+        toastLength: Toast.LENGTH_SHORT,
+        msg: 'Complete los campos',
+        backgroundColor: Colors.black45,
+      );
+      return;
+    }
+    FocusScope.of(context).unfocus(); //* Esconder teclado
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final loginOK = await authService.login(email, password);
+    if (loginOK) {
+      //TODO: Conectar al socket server
+      // ignore: use_build_context_synchronously
+      Navigator.pushReplacementNamed(context, 'usuarios');
+    } else {
+      // ignore: use_build_context_synchronously
+      mostrarAlerta(
+        context,
+        'Login incorrecto',
+        '¡Revise sus credenciales nuevamente!',
+      );
+    }
   }
 }

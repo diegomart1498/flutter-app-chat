@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
+import 'package:chat_app/helpers/mostrar_alerta.dart';
+import 'package:chat_app/services/auth_service.dart';
 import 'package:chat_app/widgets/widgets.dart';
 
 class RegisterPage extends StatelessWidget {
@@ -47,6 +52,8 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 50),
       child: Column(
@@ -71,19 +78,41 @@ class __FormState extends State<_Form> {
             isPassword: true,
           ),
           BotonAzul(
-            text: 'Ingresar',
-            onPress: () => onPress,
+            text: (!authService.autenticando) ? 'Crear cuenta' : '',
+            onPress: (!authService.autenticando) ? () => onPress : () => null,
           ),
         ],
       ),
     );
   }
 
-  void onPress() {
-    print('nombre: ${nameController.text}');
-    print('email: ${emailController.text}');
-    print('contra: ${passwordController.text}');
-    FocusScope.of(context).unfocus();
-    //TODO: Realizar acciones del botón ingresar
+  void onPress() async {
+    String nombre = nameController.text.trim();
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+    if (email.isEmpty || password.isEmpty || nombre.isEmpty) {
+      Fluttertoast.showToast(
+        toastLength: Toast.LENGTH_SHORT,
+        msg: 'Complete los campos',
+        backgroundColor: Colors.black45,
+      );
+      return;
+    }
+    FocusScope.of(context).unfocus(); //* Esconder teclado
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final registroOK = await authService.register(nombre, email, password);
+    if (registroOK == true) {
+      //TODO: Conectar al socket server
+      // ignore: use_build_context_synchronously
+      Navigator.pushReplacementNamed(context, 'usuarios');
+    } else {
+      final subtitulo = (registroOK == null) ? '' : registroOK;
+      // ignore: use_build_context_synchronously
+      mostrarAlerta(
+        context,
+        'Registro incorrecto',
+        subtitulo,
+      );
+    }
   }
 }

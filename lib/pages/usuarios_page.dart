@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+
+import 'package:chat_app/services/auth_service.dart';
 import 'package:chat_app/models/usuario.dart';
 
 class UsuariosPage extends StatefulWidget {
@@ -14,16 +17,18 @@ class _UsuariosPageState extends State<UsuariosPage> {
   final _refreshController = RefreshController(initialRefresh: false);
 
   final List<Usuario> usuarios = [
-    Usuario(online: true, name: 'Diego', email: 'u1@test.com', uid: '1'),
-    Usuario(online: false, name: 'Andrés', email: 'u2@test.com', uid: '2'),
-    Usuario(online: true, name: 'Diana', email: 'u3@test.com', uid: '3'),
+    Usuario(online: true, nombre: 'Diego', email: 'u1@test.com', uid: '1'),
+    Usuario(online: false, nombre: 'Andrés', email: 'u2@test.com', uid: '2'),
+    Usuario(online: true, nombre: 'Diana', email: 'u3@test.com', uid: '3'),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+    final usuario = authService.usuario;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mi nombre'),
+        title: Text(usuario.nombre),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.blueAccent,
@@ -31,6 +36,8 @@ class _UsuariosPageState extends State<UsuariosPage> {
           icon: const Icon(Icons.exit_to_app),
           tooltip: 'Cerrar sesión',
           onPressed: () {
+            //TODO: Desconectar el socket server
+            AuthService.deleteToken();
             Navigator.pushReplacementNamed(context, 'login');
           },
         ),
@@ -79,12 +86,12 @@ class _UsuariosPageState extends State<UsuariosPage> {
 
   ListTile _usuarioListTile(Usuario usuario) {
     return ListTile(
-      title: Text(usuario.name),
+      title: Text(usuario.nombre),
       subtitle: Text(usuario.email),
       leading: CircleAvatar(
         backgroundColor: Colors.blueAccent.withOpacity(0.8),
         child: Text(
-          usuario.name.substring(0, 2),
+          usuario.nombre.substring(0, 2),
           style: const TextStyle(color: Colors.white),
         ),
       ),

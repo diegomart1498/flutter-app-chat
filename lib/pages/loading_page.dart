@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:chat_app/pages/login_page.dart';
 import 'package:chat_app/pages/usuarios_page.dart';
 import 'package:chat_app/services/auth_service.dart';
+import 'package:chat_app/services/socket_service.dart';
 
 class LoadingPage extends StatelessWidget {
   const LoadingPage({Key? key}) : super(key: key);
@@ -24,10 +25,11 @@ class LoadingPage extends StatelessWidget {
 
   Future checkLoginState(BuildContext context) async {
     final authService = Provider.of<AuthService>(context, listen: false);
+    final socketService = Provider.of<SocketService>(context, listen: false);
     final autenticado = await authService.isLoggedIn();
     if (autenticado) {
-      //TODO: Conectar al socket server
-
+      // Conectar al socket server
+      socketService.connect();
       // ignore: use_build_context_synchronously
       Navigator.pushReplacement(
         context,

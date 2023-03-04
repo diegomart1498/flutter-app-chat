@@ -4,6 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:chat_app/helpers/mostrar_alerta.dart';
 import 'package:chat_app/services/auth_service.dart';
+import 'package:chat_app/services/socket_service.dart';
 import 'package:chat_app/widgets/widgets.dart';
 
 class LoginPage extends StatelessWidget {
@@ -91,9 +92,11 @@ class __FormState extends State<_Form> {
     }
     FocusScope.of(context).unfocus(); //* Esconder teclado
     final authService = Provider.of<AuthService>(context, listen: false);
+    final socketService = Provider.of<SocketService>(context, listen: false);
     final loginOK = await authService.login(email, password);
     if (loginOK) {
-      //TODO: Conectar al socket server
+      // Conectar al socket server
+      socketService.connect();
       // ignore: use_build_context_synchronously
       Navigator.pushReplacementNamed(context, 'usuarios');
     } else {

@@ -83,6 +83,7 @@ class AuthService with ChangeNotifier {
       'Content-Type': 'application/json',
       'x-token': token ?? '',
     });
+    // envolver con try catch
     if (resp.statusCode == 200) {
       final loginResponse = loginResponseFromJson(resp.body);
       usuario = loginResponse.usuario;

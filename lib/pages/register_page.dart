@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:chat_app/helpers/mostrar_alerta.dart';
+import 'package:chat_app/services/socket_service.dart';
 import 'package:chat_app/services/auth_service.dart';
 import 'package:chat_app/widgets/widgets.dart';
 
@@ -100,9 +101,11 @@ class __FormState extends State<_Form> {
     }
     FocusScope.of(context).unfocus(); //* Esconder teclado
     final authService = Provider.of<AuthService>(context, listen: false);
+    final socketService = Provider.of<SocketService>(context, listen: false);
     final registroOK = await authService.register(nombre, email, password);
     if (registroOK == true) {
-      //TODO: Conectar al socket server
+      // Conectar al socket server
+      socketService.connect();
       // ignore: use_build_context_synchronously
       Navigator.pushReplacementNamed(context, 'usuarios');
     } else {
